@@ -245,4 +245,170 @@ Content-Type: application/json
   "email": "janedoe@example.com",
   "password": "securepassword123"
 }
+
 ```
+---
+# User Profile and Logout API Documentation
+
+## **1. Get User Profile**
+
+### **Endpoint: `GET /profile`**
+
+#### **Description**
+The `/profile` endpoint retrieves the authenticated user's profile data. This endpoint requires a valid JWT for authentication.
+
+---
+
+### **Request Specification**
+
+#### **Headers**
+| Key            | Value                   |
+|----------------|-------------------------|
+| `Authorization` | `Bearer <JWT_TOKEN>`   |
+
+#### **Authentication**
+The endpoint uses the `authUser` middleware to verify the user's authentication token. If the token is invalid, missing, or blacklisted, access is denied.
+
+---
+
+### **Response Specification**
+
+#### **Success Response**
+- **Status Code**: `200 OK`
+- **Body**:
+    ```json
+    {
+      "_id": "<USER_ID>",
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "johndoe@example.com",
+      "createdAt": "2024-12-08T12:00:00.000Z",
+      "updatedAt": "2024-12-08T12:00:00.000Z"
+    }
+    ```
+
+#### **Error Responses**
+
+1. **Unauthorized Access**  
+   Occurs when the token is missing, invalid, or blacklisted.
+   - **Status Code**: `401 Unauthorized`
+   - **Body**:
+     ```json
+     {
+       "message": "Unauthorized"
+     }
+     ```
+
+2. **Invalid Token**  
+   Occurs when the provided token does not match a valid user or has expired.
+   - **Status Code**: `401 Unauthorized`
+   - **Body**:
+     ```json
+     {
+       "message": "Invalid token",
+       "error": "<Error details>"
+     }
+     ```
+
+---
+
+## **2. User Logout**
+
+### **Endpoint: `GET /logout`**
+
+#### **Description**
+The `/logout` endpoint logs out the user by blacklisting the current authentication token and clearing the token cookie. This ensures that the token cannot be reused.
+
+---
+
+### **Request Specification**
+
+#### **Headers**
+| Key            | Value                   |
+|----------------|-------------------------|
+| `Authorization` | `Bearer <JWT_TOKEN>`   |
+
+#### **Authentication**
+The endpoint uses the `authUser` middleware to verify the user's authentication token before proceeding with the logout process.
+
+---
+
+### **Response Specification**
+
+#### **Success Response**
+- **Status Code**: `200 OK`
+- **Body**:
+    ```json
+    {
+      "message": "Logged Out Successfully"
+    }
+    ```
+
+#### **Error Responses**
+
+1. **Unauthorized Access**  
+   Occurs when the token is missing, invalid, or blacklisted.
+   - **Status Code**: `401 Unauthorized`
+   - **Body**:
+     ```json
+     {
+       "message": "Unauthorized"
+     }
+     ```
+
+2. **Invalid Token**  
+   Occurs when the provided token is invalid or expired.
+   - **Status Code**: `401 Unauthorized`
+   - **Body**:
+     ```json
+     {
+       "message": "Invalid token",
+       "error": "<Error details>"
+     }
+     ```
+
+---
+
+## **Implementation Details**
+
+### **Middleware: `authUser`**
+1. **Token Extraction**:
+   - Extracts the token from the `Authorization` header or cookies.
+
+2. **Token Verification**:
+   - Verifies the token using `jsonwebtoken` and checks its validity against the secret key.
+
+3. **Blacklisted Token Check**:
+   - Queries the `BlacklistedToken` collection to ensure the token is not blacklisted.
+
+4. **User Validation**:
+   - Retrieves the user associated with the token and ensures the user exists.
+
+5. **Error Handling**:
+   - Returns appropriate error messages for invalid, expired, or missing tokens.
+
+---
+
+### **Logout Process**
+1. **Token Blacklisting**:
+   - Adds the token to the `BlacklistedToken` collection to prevent future use.
+   - Includes an expiration timestamp to automatically remove tokens after 24 hours.
+
+2. **Cookie Clearing**:
+   - Clears the `token` cookie from the user's browser.
+
+3. **Confirmation**:
+   - Sends a success response confirming the logout.
+
+---
+
+## **Example Requests and Responses**
+
+### **Get User Profile**
+
+#### Request:
+```http
+GET /profile HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
