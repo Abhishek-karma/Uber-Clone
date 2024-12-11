@@ -293,26 +293,29 @@ The endpoint uses the `authUser` middleware to verify the user's authentication 
 
 ---
 
-## **5. Captain Registration API**
+# Captain Management API
 
-### **Endpoint**: `/captains/register`
-**Method**: `POST`
-
-#### **Description**
-This endpoint registers a new captain by providing personal and vehicle details.
+This API is designed to manage captains, including registration, login, profile access, and logout. It uses Express.js for routing, `express-validator` for request validation, and JSON Web Tokens (JWT) for authentication.
 
 ---
 
-#### **Request Specification**
+## **Routes**
 
-##### **Headers**
-| Key            | Value                |
-|----------------|----------------------|
-| `Content-Type` | `application/json`  |
+### **1. Register a New Captain**
 
-##### **Request Body**
-The request body must be in JSON format with the following structure:
+**Endpoint**: `/register`  
+**Method**: `POST`  
 
+#### **Validation Rules**
+- `email`: Must be a valid email address.
+- `fullname.firstname`: Must be at least 3 characters long.
+- `password`: Must be at least 8 characters long.
+- `vehicle.color`: Must be at least 3 characters long.
+- `vehicle.plate`: Must be at least 3 characters long.
+- `vehicle.capacity`: Must be at least 1.
+- `vehicle.vehicleType`: Must be one of `car`, `motorcycle`, or `auto`.
+
+#### **Request Body**
 ```json
 {
   "fullname": {
@@ -330,23 +333,8 @@ The request body must be in JSON format with the following structure:
 }
 ```
 
-**Field Descriptions**
-- `fullname.firstname`: Captain's first name (required, minimum 3 characters)
-- `fullname.lastname`: Captain's last name (optional)
-- `email`: Captain's email address (required)
-- `password`: Captain's password (required, minimum 8 characters)
-- `vehicle.color`: Vehicle color (required)
-- `vehicle.plate`: Vehicle plate number (required)
-- `vehicle.capacity`: Vehicle capacity (required)
-- `vehicle.vehicleType`: Vehicle type (required, allowed values: car, motorcycle, auto)
-
----
-
-#### **Response Specification**
-
-##### **Success Response**
-- **Status Code**: `201 Created`
-- **Body**:
+#### **Response**
+- **Success (201)**:
     ```json
     {
       "captain": {
@@ -366,48 +354,164 @@ The request body must be in JSON format with the following structure:
         "createdAt": "2024-12-08T12:00:00.000Z",
         "updatedAt": "2024-12-08T12:00:00.000Z"
       },
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "token": "<JWT_TOKEN>"
+    }
+    ```
+- **Validation Errors (400)**:
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Error message",
+          "param": "field_name",
+          "location": "body"
+        }
+      ]
     }
     ```
 
-##### **Error Responses**
+---
 
-1. **Validation Errors**
-   - **Status Code**: `400 Bad Request`
-   - **Body**:
-      ```json
-      {
-        "errors": [
-          {
-            "msg": "Error message",
-            "param": "field_name",
-            "location": "body"
-          }
-        ]
-      }
-      ```
+### **2. Login a Captain**
 
-2. **Captain Already Exists**  
-   - **Status Code**: `400 Bad Request`
-   - **Body**:
-      ```json
-      {
-        "message": "Captain already exists"
-      }
-      ```
+**Endpoint**: `/login`  
+**Method**: `POST`  
 
-3. **Server Error**  
-   - **Status Code**: `500 Internal Server Error`
-   - **Body**:
-      ```json
-      {
-        "message": "An error occurred"
-      }
-      ```
+#### **Validation Rules**
+- `email`: Must be a valid email address.
+- `password`: Must be at least 8 characters long.
+
+#### **Request Body**
+```json
+{
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+```
+
+#### **Response**
+- **Success (200)**:
+    ```json
+    {
+      "captain": {
+        "_id": "64b1f9f95d5c9e8f70db6c76",
+        "fullname": {
+          "firstname": "John",
+          "lastname": "Doe"
+        },
+        "email": "johndoe@example.com"
+      },
+      "token": "<JWT_TOKEN>"
+    }
+    ```
+- **Error (400)**: Invalid email or password.
 
 ---
 
-### Notes:
-- Ensure that the `JWT_SECRET` environment variable is set for token generation.
-- Passwords are hashed before being stored in the database.
+### **3. Get Captain Profile**
 
+**Endpoint**: `/profile`  
+**Method**: `GET`  
+**Authentication**: Requires a valid JWT token.
+
+#### **Response**
+- **Success (200)**:
+    ```json
+    {
+      "captain": {
+        "_id": "64b1f9f95d5c9e8f70db6c76",
+        "fullname": {
+          "firstname": "John",
+          "lastname": "Doe"
+        },
+        "email": "johndoe@example.com",
+        "vehicle": {
+          "color": "red",
+          "plate": "ABC123",
+          "capacity": 4,
+          "vehicleType": "car"
+        },
+        "status": "inactive"
+      }
+    }
+    ```
+- **Error (401)**: Unauthorized.
+
+---
+
+### **4. Logout a Captain**
+
+**Endpoint**: `/logout`  
+**Method**: `GET`  
+**Authentication**: Requires a valid JWT token.
+
+#### **Response**
+- **Success (200)**:
+    ```json
+    {
+      "message": "Logout Successfully"
+    }
+    ```
+- **Error (401)**: Unauthorized.
+
+---
+
+## **Authentication Middleware**
+
+### `authCaptain`
+This middleware verifies the JWT token and checks if the token is blacklisted.
+
+- If the token is valid and not blacklisted, the middleware adds the `captain` object to the `req` object.
+- If the token is invalid, missing, or blacklisted, it returns a `401 Unauthorized` response.
+
+---
+
+## **Models**
+
+### `CaptainModel`
+- Stores captain information, including name, email, hashed password, and vehicle details.
+- Implements methods for password hashing (`hashPassword`) and comparison (`comparePassword`).
+
+### `BlacklistedToken`
+- Tracks blacklisted JWT tokens to ensure logged-out users cannot reuse their tokens.
+
+---
+
+## **Services**
+
+### `captainService`
+Handles business logic for creating and managing captains.
+
+---
+
+## **Error Handling**
+
+Validation and authentication errors are captured and returned in a structured JSON format. Server errors are logged and return a `500 Internal Server Error` response.
+
+---
+
+## **Installation**
+
+1. Clone the repository:
+   ```bash
+   git clone <repository_url>
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set environment variables:
+   - `JWT_SECRET`: Secret key for JWT.
+   - `DB_URI`: MongoDB connection string.
+
+4. Start the server:
+   ```bash
+   npm start
+   ```
+
+---
+
+## **License**
+
+This project is licensed under the MIT License.
+```
