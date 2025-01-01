@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link , useNavigate} from "react-router-dom";
 import UberLogo from "../img/uber-logo.png";
+import axios from "axios";
+import { UserDataContext } from "../context/UserContext";
 
 
 const UserSignup = () => {
@@ -11,17 +13,30 @@ const UserSignup = () => {
   const [password,setPassword] = useState('');
   const [userData,setUserData] = useState('');
 
-  const submitHandler = ((e)=>{
-    e.preventDefault()
+  const navigate = useNavigate()
 
-    setUserData({
-      fullName:{
-        firstName:firstName,
-        lastName:lastName
+  const {user,setUser} = useContext(UserDataContext)
+
+  const submitHandler = (async (e)=>{
+    e.preventDefault()
+    const newUser = {
+      fullname:{
+        firstname:firstName,
+        lastname:lastName
       },
       email:email,
       password:password
-    })
+    }
+    
+    
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,newUser)
+
+    if(response.status===201){
+      const data = response.data
+      setUser(data.user)
+      localStorage.setItem('token',data.token)
+      navigate('/home')
+    }
      
     setFirstName('')
     setLastName('')
