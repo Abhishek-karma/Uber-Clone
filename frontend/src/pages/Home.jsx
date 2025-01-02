@@ -101,7 +101,7 @@ const Home = () => {
   }, [waitingForDriver]);
 
   return (
-    <div className="h-screen relative">
+    <div className='h-screen relative overflow-hidden'>
       <img
         className="w-12 sm:w-16 absolute left-5 top-5"
         src={UberLogo}
@@ -129,7 +129,7 @@ const Home = () => {
             Find a trip
           </h4>
           <form onSubmit={submitHandler}>
-            <div className="line absolute h-12 sm:h-16 w-1 top-[45%] left-6 sm:left-8 bg-gray-900 rounded-full" />
+          <div className="line absolute h-16 w-1 top-[50%] -translate-y-1/2 left-5 bg-gray-700 rounded-full"></div>
             <input
               value={pickup}
               onChange={(e) => setPickup(e.target.value)}
@@ -178,7 +178,7 @@ const Home = () => {
         <LookingForDriver setVehicleFound={setVehicleFound} />
       </div>
       <div ref={waitingForDriverRef}
-        className="fixed w-full z-10 bottom-0  px-3 py-6 pt-12 bg-white">
+        className="fixed w-full z-10 bottom-0 translate-y-full px-3 py-6 pt-12 bg-white">
         <WaitingForDriver waitingForDriver={waitingForDriver} />
       </div>
     </div>
