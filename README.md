@@ -490,19 +490,286 @@ Validation and authentication errors are captured and returned in a structured J
 
 ---
 
-## **Installation**
+
+### 1. **GET /coordinates**
+#### Description:
+Fetches the geographical coordinates (latitude and longitude) for a given address.
+
+#### Request Parameters:
+- `address`: The address to get coordinates for.
+
+#### Response:
+- **200 OK**: Returns an object with the coordinates (lat, lng).
+  ```json
+  {
+    "lat": 40.712776,
+    "lng": -74.005974
+  }
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "Address is required", "param": "address", "location": "query" }
+    ]
+  }
+  ```
+- **404 Not Found**: If the coordinates cannot be fetched.
+  ```json
+  {
+    "message": "Coordinates not found"
+  }
+  ```
+
+### 2. **GET /distance-time**
+#### Description:
+Fetches the distance and time between two locations (origin and destination).
+
+#### Request Parameters:
+- `origin`: The starting point address.
+- `destination`: The destination address.
+
+#### Response:
+- **200 OK**: Returns an object with distance and duration details.
+  ```json
+  {
+    "distance": {
+      "text": "10 km",
+      "value": 10000
+    },
+    "duration": {
+      "text": "20 mins",
+      "value": 1200
+    }
+  }
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "Origin and destination are required", "param": "origin", "location": "query" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If the server encounters an issue.
+  ```json
+  {
+    "message": "Internal server error"
+  }
+  ```
+
+### 3. **GET /autocomplete-suggestions**
+#### Description:
+Provides autocomplete suggestions for a given input (e.g., address or place name).
+
+#### Request Parameters:
+- `input`: The input string to search for.
+
+#### Response:
+- **200 OK**: Returns an array of predictions for autocomplete.
+  ```json
+  [
+    {
+      "description": "New York, NY, USA",
+      "place_id": "ChIJOwg_06VPYzAR6Yfu3j5g3uw",
+      "types": ["geocode"]
+    },
+    {
+      "description": "New Jersey, USA",
+      "place_id": "ChIJyQ64KiVZt4kRZ2XGtsYkF9w",
+      "types": ["geocode"]
+    }
+  ]
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "Input is required", "param": "input", "location": "query" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If the server encounters an issue.
+  ```json
+  {
+    "message": "Internal server error"
+  }
+  ```
+
+---
+
+## Ride Management Routes
+
+### 4. **POST /ride**
+#### Description:
+Creates a new ride with the given user, pickup, destination, and vehicle type.
+
+#### Request Body:
+- `userId`: ID of the user requesting the ride.
+- `pickup`: The pickup location address.
+- `destination`: The destination address.
+- `vehicleType`: The type of vehicle requested (e.g., `auto`, `car`, `motorcycle`).
+
+#### Response:
+- **201 Created**: Returns the ride details.
+  ```json
+  {
+    "_id": "rideId",
+    "user": "userId",
+    "pickup": "Pickup Location",
+    "destination": "Destination Location",
+    "otp": "123456",
+    "fare": 200
+  }
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "All fields are required", "param": "pickup", "location": "body" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If there’s an issue in the process.
+  ```json
+  {
+    "message": "An error occurred while creating the ride"
+  }
+  ```
+
+### 5. **POST /ride/confirm**
+#### Description:
+Confirms the ride and assigns a captain (driver).
+
+#### Request Body:
+- `rideId`: The ID of the ride to confirm.
+
+#### Response:
+- **200 OK**: Returns the confirmed ride details with captain assigned.
+  ```json
+  {
+    "_id": "rideId",
+    "user": { "name": "John Doe" },
+    "captain": { "name": "Captain Jack" },
+    "status": "accepted"
+  }
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "Ride ID is required", "param": "rideId", "location": "body" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If an error occurs while confirming the ride.
+  ```json
+  {
+    "message": "Error confirming ride"
+  }
+  ```
+
+### 6. **POST /ride/start**
+#### Description:
+Starts the ride by validating the OTP.
+
+#### Request Parameters:
+- `rideId`: The ID of the ride.
+- `otp`: The OTP to verify.
+
+#### Response:
+- **200 OK**: Returns the ride details after starting.
+  ```json
+  {
+    "_id": "rideId",
+    "status": "ongoing",
+    "user": { "name": "John Doe" },
+    "captain": { "name": "Captain Jack" }
+  }
+  ```
+- **400 Bad Request**: If OTP or ride ID is missing or invalid.
+  ```json
+  {
+    "errors": [
+      { "msg": "OTP is required", "param": "otp", "location": "query" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If an error occurs during the ride start process.
+  ```json
+  {
+    "message": "Error starting the ride"
+  }
+  ```
+
+### 7. **POST /ride/end**
+#### Description:
+Ends the ride.
+
+#### Request Body:
+- `rideId`: The ID of the ride to end.
+
+#### Response:
+- **200 OK**: Returns the ride details after completion.
+  ```json
+  {
+    "_id": "rideId",
+    "status": "completed",
+    "user": { "name": "John Doe" },
+    "captain": { "name": "Captain Jack" }
+  }
+  ```
+- **400 Bad Request**: If validation fails.
+  ```json
+  {
+    "errors": [
+      { "msg": "Ride ID is required", "param": "rideId", "location": "body" }
+    ]
+  }
+  ```
+- **500 Internal Server Error**: If an error occurs while ending the ride.
+  ```json
+  {
+    "message": "Error ending the ride"
+  }
+  ```
+
+---
+
+## Utility Functions
+
+### **Fare Calculation**
+The backend calculates fare based on distance, duration, and vehicle type. The fare is structured as:
+- `auto`, `car`, `motorcycle`: Each vehicle type has a different base fare, per km rate, and per-minute rate.
+
+### **OTP Generation**
+An OTP is generated for each ride, which is used to validate the ride start process.
+
+---
+
+### Environmental Variables
+Ensure to have the following environment variables set in your `.env` file:
+
+- `GOOGLE_MAPS_API`: Your Google Maps API key.
+
+---
+
+## Setup & Installation
 
 1. Clone the repository:
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/your-repo
    ```
+
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Set environment variables:
-   - `JWT_SECRET`: Secret key for JWT.
-   - `DB_URI`: MongoDB connection string.
+
+3. Set up your environment variables in `.env`:
+   ```bash
+   GOOGLE_MAPS_API=your-google-maps-api-key
+   ```
 
 4. Start the server:
    ```bash
@@ -511,7 +778,5 @@ Validation and authentication errors are captured and returned in a structured J
 
 ---
 
-## **License**
-
-This project is licensed under the MIT License.
+This README provides a summary of all routes and expected behavior, making it easier for developers to understand and integrate with the backend.
 ```
