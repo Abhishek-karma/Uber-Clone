@@ -1,10 +1,35 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const FinishRide = (props) => {
+  const navigate = useNavigate();
+
+  async function endRide() {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+      {
+        rideId: props.ride._id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      navigate("/captain-home");
+    }
+  }
   return (
     <div>
-      <h5 className="p-3 text-center w-[93%] absolute top-0" onClick={() => {props.setFinishRidePanel(false)}}>
+      <h5
+        className="p-3 text-center w-[93%] absolute top-0"
+        onClick={() => {
+          props.setFinishRidePanel(false);
+        }}
+      >
         <i className="text-3xl text-gray-400 p-10 ri-arrow-down-wide-line"></i>
       </h5>
 
@@ -16,7 +41,9 @@ const FinishRide = (props) => {
             src="https://imgv3.fotor.com/images/gallery/Realistic-Male-Profile-Picture.jpg"
             alt=""
           />
-          <h4 className="text-lg font-medium">Rahul Smith</h4>
+          <h4 className="text-lg font-medium">
+            {props.ride?.user.fullname.firstname}
+          </h4>
         </div>
         <h5 className="text-lg font-semibold px-5">2.2 KM</h5>
       </div>
@@ -28,7 +55,7 @@ const FinishRide = (props) => {
             <div>
               <h3 className="text-xl font-semibold">561/11A</h3>
               <p className="text-sm -mt-1 text-gray-600">
-                Aurangabad hotel, Maharashtra
+                {props.ride?.pickup}
               </p>
             </div>
           </div>
@@ -36,25 +63,27 @@ const FinishRide = (props) => {
             <i className=" text-lg ri-map-pin-user-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">561/11A</h3>
-              <p className="text-sm -mt-1 text-gray-600">Nagpur, Maharashtra</p>
+              <p className="text-sm -mt-1 text-gray-600">
+                {props.ride?.destination}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4 p-2 ">
             <i className=" text-lg ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-xl font-semibold">193.6</h3>
+              <h3 className="text-xl font-semibold">{props.ride?.fare}</h3>
               <p className="text-sm -mt-1 text-gray-600">Cash Pay</p>
             </div>
           </div>
         </div>
 
         <div className="w-full mt-4 ">
-          <Link
-            to={"/captain-home"}
+          <button
+            onClick={endRide}
             className="justify-center w-full mt-2 flex bg-green-600 text-white text-2xl rounded-lg p-3  font-semibold"
           >
             COMPLETE RIDE
-          </Link>
+          </button>
         </div>
       </div>
     </div>

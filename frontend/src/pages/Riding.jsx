@@ -1,7 +1,20 @@
-import React from "react";
-import {Link} from 'react-router-dom';
+import React from 'react'
+import { Link, useLocation } from 'react-router-dom' // Added useLocation
+import { useEffect, useContext } from 'react'
+import { SocketContext } from '../context/SocketContext'
+import { useNavigate } from 'react-router-dom'
+import LiveTracking from '../components/LiveTracking'
 
 const Riding = () => {
+    const location = useLocation()
+    const { ride } = location.state || {} // Retrieve ride data
+    const { socket } = useContext(SocketContext)
+    const navigate = useNavigate()
+
+    socket.on("ride-ended", () => {
+        navigate('/home')
+    })
+
   return (
     <div className="h-screen">
         <Link to='/home' className="fixed right-2 top-2 w-10 h-10 bg-white flex items-center justify-center rounded-full">
@@ -23,8 +36,8 @@ const Riding = () => {
             />
 
             <div className="text-right">
-                <h2 className="text-lg font-medium">Ramesh</h2>
-                <h4 className="text-xl font-semibold -mt-1 -mb-1">MH02RG4354</h4>
+                <h2 className="text-lg font-medium capitalize">{ride?.captain.fullname.firstname}</h2>
+                <h4 className="text-xl font-semibold -mt-1 -mb-1 ">{ride?.captain.vehicle.plate}</h4>
                 <p className="text-sm text-gray-600">Maruti Suzuki</p>
             </div>
             </div>
@@ -36,14 +49,14 @@ const Riding = () => {
                 <div>
                     <h3 className="text-xl font-semibold">561/11A</h3>
                     <p className="text-sm -mt-1 text-gray-600">
-                    Nagpur, Maharashtra
+                   {ride?.destination}
                     </p>
                 </div>
                 </div>
                 <div className="flex items-center gap-4 p-2 ">
                 <i className=" text-lg ri-money-rupee-circle-line"></i>
                 <div>
-                    <h3 className="text-xl font-semibold ">193.6</h3>
+                    <h3 className="text-xl font-semibold ">{ride?.fare}</h3>
                     <p className="text-sm -mt-1 text-gray-600">Cash Pay</p>
                 </div>
                 </div>

@@ -5,7 +5,7 @@ const WaitingForDriver = (props) => {
     <div>
         <h5
           className="p-3 text-center w-[93%] absolute top-0"
-          onClick={() => { props.waitingForDriver(false);}}>
+          onClick={() => { props.waitingForDriver(false)}}>
           <i className="text-3xl text-gray-400 p-10 ri-arrow-down-wide-line"></i>
         </h5>
       
@@ -16,9 +16,10 @@ const WaitingForDriver = (props) => {
             />
 
         <div className='text-right'>
-          <h2 className='text-lg font-medium'>Ramesh</h2>
-          <h4 className='text-xl font-semibold -mt-1 -mb-1'>MH02RG4354</h4>
+          <h2 className='text-lg font-medium capitalize'>{props.ride?.captain.fullname.firstname+" "+props.ride?.captain.fullname.lastname}</h2>
+          <h4 className='text-xl font-semibold -mt-1 -mb-1'>{props.ride?.captain.vehicle.plate}</h4>
           <p className='text-sm text-gray-600'>Maruti Suzuki</p>
+          <h1 className='text-lg font-semibold'>  {props.ride?.otp} </h1>
         </div>
     </div>
 
@@ -31,20 +32,20 @@ const WaitingForDriver = (props) => {
               <i className="text-lg ri-map-pin-2-fill"></i>
               <div>
                 <h3 className="text-xl font-semibold">561/11A</h3>
-                <p className="text-sm -mt-1 text-gray-600">Aurangabad hotel, Maharashtra</p>
+                <p className="text-sm -mt-1 text-gray-600">{props.ride?.pickup}</p>
               </div>
           </div>
           <div  className="flex items-center gap-4 p-2 border-b-2">
                 <i className=" text-lg ri-map-pin-user-fill"></i>
                 <div>
                   <h3 className="text-xl font-semibold">561/11A</h3>
-                  <p className="text-sm -mt-1 text-gray-600">Nagpur, Maharashtra</p>
+                  <p className="text-sm -mt-1 text-gray-600">{props.ride?.destination}</p>
                 </div>
           </div>
           <div  className="flex items-center gap-4 p-2 ">
                 <i className=" text-lg ri-money-rupee-circle-line"></i>
                 <div>
-                  <h3 className="text-xl font-semibold">193.6</h3>
+                  <h3 className="text-xl font-semibold">{props.ride?.fare}</h3>
                   <p className="text-sm -mt-1 text-gray-600">Cash Pay</p>
                 </div>
           </div>

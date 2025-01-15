@@ -1,34 +1,34 @@
-import React from 'react'
+import React from 'react';
 
+const LocationSearchPanel = ({ suggestions, setVehiclePanel, setPanelOpen, setPickup, setDestination, activeField }) => {
+  const handleSuggestionClick = (suggestion) => {
+    if (activeField === 'pickup') {
+        setPickup(suggestion.description);  // Ensure you're using the 'description' property
+    } else if (activeField === 'destination') {
+        setDestination(suggestion.description);  // Ensure you're using the 'description' property
+    }
+    // Optionally close the panel if needed
+    // setPanelOpen(false);
+};
 
-
-const LocationSearchPanel = (props) => {
-  
-  
-  const locations = [
-    "Flat No. 101, Sector 5, Noida, Uttar Pradesh, 201301", 
-    "House No. 23, MG Road, Bangalore, Karnataka, 560001",
-    "B-12, Vikas Puri, New Delhi, Delhi, 110018",
-    "Shop No. 4, Laxmi Nagar, Mumbai, Maharashtra, 400022"
-  ];
-  return (
-    <div>
-      {
-        locations.map((element,idx)=>{
-          return <div key={idx} onClick={()=>{
-           
-            props.setVehiclePanel(true)
-            props.setPanelOpen(false)
-          }} className='flex border-2 p-2 border-white active:border-black items-center rounded-xl  my-2 justify-start gap-3'>
-          <h2 className='bg-[#eee] flex h-12 w-12 items-center justify-center rounded-full'><i className="ri-map-pin-2-fill text-[20px] "></i></h2>
-          <h4 className='font-medium '>{element}</h4>
+    return (
+        <div>
+            {/* Display fetched suggestions */}
+            {suggestions.map((elem, idx) => (
+                <div
+                    key={idx}
+                    onClick={() => handleSuggestionClick(elem)}
+                    className='flex gap-4 border-2 p-3 border-gray-50 active:border-black rounded-xl items-center my-2 justify-start'
+                >
+                    <h2 className='bg-[#eee] h-8 flex items-center justify-center w-12 rounded-full'>
+                        <i className="ri-map-pin-fill"></i>
+                    </h2>
+                    {/* Access a specific property of `elem` to render */}
+                    <h4 className='font-medium'>{elem.description}</h4>
+                </div>
+            ))}
         </div>
-        })
-      }
-      
-      
-    </div>
-  )
-}
+    );
+};
 
-export default LocationSearchPanel
+export default LocationSearchPanel;

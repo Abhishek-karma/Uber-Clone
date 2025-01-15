@@ -1,7 +1,6 @@
 import React from "react";
 
 const VehiclePanel = (props) => {
-
   return (
     <div>
       <h5
@@ -17,6 +16,8 @@ const VehiclePanel = (props) => {
       <div
         onClick={() => {
           props.setConfirmRidePanel(true);
+          props.selectVehicle('car');
+          props.setVehiclePanel(false);
         }}
         className="flex mb-2 border-2 active:border-black rounded-xl p-3 w-full items-center justify-between"
       >
@@ -37,12 +38,14 @@ const VehiclePanel = (props) => {
             Affordable, compact rides
           </p>
         </div>
-        <h2 className="text-lg font-semibold"> ₹192.6 </h2>
+        <h2 className="text-lg font-semibold">₹{props.fare.car}</h2>
       </div>
 
       <div
         onClick={() => {
           props.setConfirmRidePanel(true);
+          props.selectVehicle('auto');
+          props.setVehiclePanel(false);
         }}
         className="flex mb-2 border-2 active:border-black rounded-xl p-3 w-full items-center justify-between"
       >
@@ -63,12 +66,14 @@ const VehiclePanel = (props) => {
             Affordable, compact rides
           </p>
         </div>
-        <h2 className="text-lg font-semibold"> ₹89.6 </h2>
+        <h2 className="text-lg font-semibold">₹{props.fare.auto}</h2>
       </div>
 
       <div
         onClick={() => {
           props.setConfirmRidePanel(true);
+          props.selectVehicle('motorcycle');
+          props.setVehiclePanel(false);
         }}
         className="flex mb-2 border-2 active:border-black  rounded-xl p-3 w-full items-center justify-between"
       >
@@ -89,7 +94,7 @@ const VehiclePanel = (props) => {
             Affordable, compact rides
           </p>
         </div>
-        <h2 className="text-lg font-semibold"> ₹52 </h2>
+        <h2 className="text-lg font-semibold">₹{props.fare.motorcycle}</h2>
       </div>
     </div>
   );
